@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="fonts/fonts.css">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="css/main.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/index.css">
+    <title>Альфа-танк</title>
+</head>
+<body ng-app="app" ng-controller="indexCtrl">
+<div id='wrapper'>
+    <header>
+
+    </header>
+    <article>
+
+        <div id='big-logo'>
+            <h1>Альфа-Танк</h1>
+        </div>
+        <div id='levels'>
+            <a class="level" ng-href="level.html?id={{level.id}}" ng-repeat="level in levels">
+                <img ng-src="{{level.img}}" alt="">
+            </a>
+        </div>
+        <div id='choose-level'>
+            <h4>Выбери уровень</h4>
+        </div>
+    </article>
+    <footer>
+        <div>
+            <p>Курсовой проект по курсу &lt;<b>Вёрстка и проектирование сайтов</b>&gt;</p>
+            <p>Автор: Донат Шергалис</p>
+        </div>
+    </footer>
+</div>
+</body>
+
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js'></script>
+<script src='js/levels.mjs' type='module'>
+    window.LEVELS = LEVELS;
+</script>
+<script src='js/index.js'></script>
+
+
+</html>

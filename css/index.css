@@ -1,0 +1,49 @@
+article {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+#levels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.level {
+    position: relative;
+    margin: 0 7vh;
+}
+
+.level img {
+    width: 30vh;
+}
+
+.level:before {
+    position: absolute;
+    left: -25%;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    filter: blur(80pt);
+    background-color: gold;
+    width: 150%;
+    height: 150%;
+    display: block;
+    border-radius: 50%;
+    content: ' ';
+
+    opacity: 0;
+    transition: opacity 3s;
+}
+
+.level:hover:before {
+    opacity: 35%;
+    transition: opacity 1s;
+}
+
+#choose-level {
+    margin-top: 0;
+}

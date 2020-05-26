@@ -1,0 +1,35 @@
+#lives {
+    display: flex;
+    flex-direction: row;
+}
+
+#lives > img {
+    margin: 0;
+    height: 30pt;
+    width: 30pt;
+}
+
+article {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+#arena {
+    position: relative;
+    height: 60vh;
+    width: 60vh;
+    border: red 1px solid;
+}
+
+#arena * {
+    position: absolute;
+}
+
+#arena .wall {
+    background-color: yellow;
+}
+
+#arena .enemy {
+
+}

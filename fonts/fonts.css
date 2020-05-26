@@ -1,0 +1,35 @@
+@font-face {
+	font-family: 'Red October';
+	src: local('Red October'),
+		url('Red October.ttf') format('truetype');
+	font-weight: 200;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Red October-Fat';
+	src: local('Red October-Fat'),
+	url('Red October-Fat.ttf') format('truetype');
+	font-weight: 200;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Red October-Light';
+	src: local('Red October-Light'),
+	url('Red October-Light.ttf') format('truetype');
+	font-weight: 200;
+	font-style: normal;
+}
+
+* {
+	font-family: 'Red October-Light', sans-serif;
+}
+
+h1, h2, h3, b, strong {
+	font-family: 'Red October-Fat', 'Red October', sans-serif;
+}
+
+/*i {
+	font-family: 'Red October-Light', 'Red October', sans-serif;
+}*/

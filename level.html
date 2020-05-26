@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="fonts/fonts.css">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="css/main.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/level.css">
+    <title>Уровень </title>
+</head>
+<body ng-app="app" ng-controller="levelCtrl">
+<div id='wrapper'>
+    <header>
+        <a id="back" href="."><b>Назад</b></a>
+        <div id="score" ng-model="meta.score"></div>
+        <div id="level" ng-model="level.title"></div>
+        <div id="lives">
+            <img ng-repeat="life in lives(level.lives, meta.lives) track by $index" ng-src="img/heart_{{life ? 'full' : 'empty'}}.png"
+                 alt="" ng-show="life">
+        </div>
+    </header>
+    <article>
+        <div id="arena">
+            <div class="wall" ng-repeat="wall in meta.walls" ng-style="{
+                width: cell_w + '%',
+                height: cell_h + '%',
+                left: wall.x * cell_w + '%',
+                top: wall.y * cell_h + '%'
+            }"></div>
+        </div>
+    </article>
+    <footer>
+    </footer>
+</div>
+</body>
+
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js'></script>
+<script src='js/levels.mjs' type='module'>
+    window.LEVELS = LEVELS;
+</script>
+<script src='js/level.js'></script>
+
+
+</html>
