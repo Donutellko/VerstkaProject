@@ -1,7 +1,7 @@
 @font-face {
-	font-family: 'Red October';
-	src: local('Red October'),
-		url('Red October.ttf') format('truetype');
+	font-family: 'Red October-Regular';
+	src: local('Red October-Regular'),
+		url('Red October-Regular.ttf') format('truetype');
 	font-weight: 200;
 	font-style: normal;
 }
@@ -23,13 +23,13 @@
 }
 
 * {
-	font-family: 'Red October-Light', sans-serif;
+	font-family: 'Red October-Light', 'Red October-Regular', sans-serif;
 }
 
 h1, h2, h3, b, strong {
-	font-family: 'Red October-Fat', 'Red October', sans-serif;
+	font-family: 'Red October-Fat', 'Red October-Regular', sans-serif;
 }
 
 /*i {
-	font-family: 'Red October-Light', 'Red October', sans-serif;
+	font-family: 'Red October-Light', 'Red October-Regular', sans-serif;
 }*/

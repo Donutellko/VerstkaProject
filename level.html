@@ -15,22 +15,20 @@
         <a id="back" href="."><b>Назад</b></a>
         <div id="score" ng-model="meta.score"></div>
         <div id="level" ng-model="level.title"></div>
-        <div id="lives">
-            <img ng-repeat="life in lives(level.lives, meta.lives) track by $index" ng-src="img/heart_{{life ? 'full' : 'empty'}}.png"
-                 alt="" ng-show="life">
+        <div id="lives" title="Осталось {{meta.lives}} из {{level.lives}} очков здоровья">
+            <img ng-repeat="life in lives(level.lives, meta.lives) track by $index" ng-src="img/interface/heart_mini_{{life ? 'full' : 'empty'}}.png"
+                 class="pixel" alt="">
         </div>
     </header>
     <article>
         <div id="arena">
-            <div class="wall" ng-repeat="wall in meta.walls" ng-style="{
-                width: cell_w + '%',
-                height: cell_h + '%',
-                left: wall.x * cell_w + '%',
-                top: wall.y * cell_h + '%'
-            }"></div>
+            <!-- there will be THE BATTLE-->
         </div>
     </article>
     <footer>
+        <div>
+            <p>Курсовой проект по курсу <b>Вёрстка и прототипирование сайтов</b></p>
+        </div>
     </footer>
 </div>
 </body>

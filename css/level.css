@@ -17,19 +17,37 @@ article {
 
 #arena {
     position: relative;
-    height: 60vh;
-    width: 60vh;
     border: red 1px solid;
 }
 
 #arena * {
     position: absolute;
+    background-size: contain;
+    background-position: 50% 50%;
+    transition: transform 1s;
+}
+
+#arena .dead {
+    display: none;
 }
 
 #arena .wall {
-    background-color: yellow;
+    background: url('../img/wall.png');
+    background-size: contain;
 }
 
 #arena .enemy {
+    background-image: url('../img/units/enemy.png');
+}
 
+#arena .player {
+    background-image: url('../img/units/player.png');
+}
+
+#arena .eagle {
+    background-image: url('../img/units/eagle.png');
+}
+
+#arena .barrier {
+    background-image: url('../img/units/barrier.png');
 }
