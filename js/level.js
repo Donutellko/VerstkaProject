@@ -1,95 +1,8 @@
 const app = angular.module("app", []);
 const label = document.getElementById('label');
 
-const isLiveEdit = location.href.match(/https?:\/\/localhost:\d{5}\/.+/).length > 0;
-const isLocalhost = location.href.match(/https?:\/\/localhost:\d+\/.+/).length > 0 || location.href.match(/^file:\/\/\//);
 
-const CLASS_PIXEL = "pixel";
-const CLASS_DEAD = "dead";
-
-const CLASS_WALL = "wall";
-const CLASS_BARRIER = "barrier";
-const CLASS_EAGLE = "eagle";
-const CLASS_ENEMY = "enemy";
-const CLASS_PLAYER = "player";
-const CLASS_BULLET = "bullet";
-
-const STEP_TIMEOUT = 300;
-
-const MODES = {
-    TURRET: "guard",
-    wait: "wait"
-};
-
-const UP = "UP";
-const RIGHT = "RIGHT";
-const DOWN = "DOWN";
-const LEFT = "LEFT";
-
-const DIR = {
-    UP: 0,
-    RIGHT: 90,
-    DOWN: 180,
-    LEFT: 270,
-};
-
-const SCORES = {
-    [CLASS_WALL]: 10,
-    [CLASS_ENEMY]: 100,
-    [CLASS_BULLET]: 0,
-    [CLASS_EAGLE]: 500,
-};
-
-const levels = [{
-    id: 1,
-    title: "2-Д",
-    img: "img/level_2d.png",
-    lives: 3,
-    field: `
-            ----#@#----
-            --&-*-*----
-            #*------&*-
-            &----*---*-
-            -*-***-----
-            -*---*---*-
-            -*-------*#
-            ----#**---&
-            &-***$#----
-            `,
-    enemies: [
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 0},
-        {dir: DIR.LEFT, mode: MODES.TURRET, period: 3, offset: 2},
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 2, offset: 1},
-        {dir: DIR.LEFT, mode: MODES.TURRET, period: 3, offset: 0},
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 7, offset: 5},
-    ],
-    player: {dir: DIR.DOWN}
-}, {
-    id: 2,
-    title: "3-Д",
-    img: "img/level_3d.png",
-    field: `-----&-----
-            ----&-&----
-            #*&-----&*-
-            &----*---*-
-            -*-**-----$
-            &----*---*-
-            **-------*#
-            ----#**---&
-            &--*#@#---`,
-    enemies: [
-        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 0},
-        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 1},
-        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 2},
-        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 3},
-        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 2},
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 1},
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 2},
-        {dir: DIR.LEFT, mode: MODES.TURRET, period: 7, offset: 5},
-        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 7, offset: 5},
-    ],
-    player: {dir: DIR.UP}
-}];
+const levels = window.LEVELS;
 
 let arena = {
     elem: document.getElementById('arena'),
@@ -103,7 +16,12 @@ let arena = {
 app.controller('levelCtrl', function ($scope) {
     window.$scope = $scope;
 
-    loadMeta();
+    try {
+        loadMeta();
+    } catch (e) {
+        localStorage.clear();
+        loadMeta();
+    }
 
     $scope.start = function (levelInfo) {
         showMessage("Достигните базы, не допустите её уничтожения!");
@@ -121,7 +39,12 @@ app.controller('levelCtrl', function ($scope) {
         field.player.dir = level.player.dir;
         moveUnit(field.player)
     };
-    $scope.start(getLevelInfo($scope.meta.levelId));
+    try {
+        $scope.start(getLevelInfo($scope.meta.levelId));
+    } catch (e) {
+        localStorage.clear();
+        $scope.start(getLevelInfo($scope.meta.levelId));
+    }
 
     $scope.lives = function (max, actual) {
         lives = [];
@@ -226,9 +149,9 @@ function getUnit(x, y) {
     let collides = (unit) => unit.alive && unit.x === x && unit.y === y;
     for (let unit of field.enemies) if (collides(unit)) return unit;
     for (let unit of field.walls) if (collides(unit)) return unit;
-    for (let unit of field.bullets) if (collides(unit)) return unit;
     if (collides(field.player)) return field.player;
     if (collides(field.eagle)) return field.eagle;
+    for (let unit of field.bullets) if (collides(unit)) return unit;
 
     if (x < 0 || y < 0 || x >= field.w || y >= field.h) return true;
 }
@@ -238,7 +161,8 @@ function getLevelInfo(id) {
 }
 
 function getLevelId() {
-    return location.href.match(/id=([^#&]+)/)[1];
+    let level = location.href.match(/id=([^#&]+)/);
+    return level ? level[1] : 1;
 }
 
 function showUnit(unit) {
@@ -265,15 +189,6 @@ function moveUnit(unit) { // move with little timeout, when unit shoul smoothly 
 function moveUnitRn(unit) { // move right now (when unit should just appear)
     unit.elem.style.transform = `translate(${unit.x * 100}%, ${unit.y * 100}%) rotate(${unit.dir | 0}deg)`;
 }
-
-let TYPES = {
-    '*': CLASS_WALL,
-    '#': CLASS_BARRIER,
-    '$': CLASS_EAGLE,
-    '&': CLASS_ENEMY,
-    '@': CLASS_PLAYER,
-    '-': null
-};
 
 function parseField(toParse) {
     let lines = toParse.trim().split('\n');
@@ -351,8 +266,8 @@ function step() {
             enemy.offset--;
         }
     }
-    for (let bullet of field.bullets) stepBullet(bullet)
-    for (let bullet of field.bullets) stepBullet(bullet)
+    for (let bullet of field.bullets) stepBullet(bullet);
+    for (let bullet of field.bullets) stepBullet(bullet);
     setTimeout(() => arena.ready = true, STEP_TIMEOUT);
     saveProgress();
 }
@@ -381,7 +296,6 @@ function kill(unit, bullet) {
             if (bullet.from === CLASS_PLAYER) {
                 $scope.meta.score += SCORES[unit.class];
             }
-            // $scope.$apply();
             setTimeout(() => unit.elem.classList.add(CLASS_DEAD), STEP_TIMEOUT);
             break;
         case CLASS_PLAYER:
@@ -421,6 +335,7 @@ function saveMeta() {
 function loadMeta() {
     if (localStorage.meta != null) {
         $scope.meta = JSON.parse(localStorage.meta);
+        if ($scope.meta.lives <= 0) throw "no lives";
     } else {
         $scope.meta = {score: 0, levelId: getLevelId(), lives: 3 }
     }
