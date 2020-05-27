@@ -1,7 +1,6 @@
 const app = angular.module("app", []);
 const label = document.getElementById('label');
 
-
 const levels = window.LEVELS;
 
 let arena = {
