@@ -15,16 +15,18 @@
         <div id="stats">
             <p id="score" ng-bind="'Очков: ' + meta.score"></p>
             <div id="lives" title="Осталось {{meta.lives}} из {{level.lives}} очков здоровья">
-                <img ng-repeat="life in lives(level.lives, meta.lives) track by $index"
+                <img ng-repeat="life in lives(3, meta.lives) track by $index"
                      ng-src="img/interface/heart_mini_{{life ? 'full' : 'empty'}}.png"
                      class="pixel" alt="">
             </div>
         </div>
         <div><h3 id="level" ng-bind="meta.title"></h3></div>
-        <a id="back" href="."><b>Назад</b></a>
+        <div id="controls">
+            <a id="back" href="."><b>Назад</b></a>
+            <a id="reset" href="#" ng-click="reset()"><b>Сброс</b></a>
+        </div>
     </header>
     <article>
-        <div id="label"><h4>Время обеда!</h4></div>
         <div id="arena">
             <!-- there will be THE BATTLE-->
         </div>
@@ -34,6 +36,7 @@
             <p>Курсовой проект по курсу <b>Вёрстка и прототипирование сайтов</b></p>
         </div>
     </footer>
+    <div id="label"><h4>Время обеда!</h4></div>
 </div>
 </body>
 

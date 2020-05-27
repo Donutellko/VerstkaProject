@@ -36,7 +36,8 @@ const DIR = {
 const SCORES = {
     [CLASS_WALL]: 10,
     [CLASS_ENEMY]: 100,
-    [CLASS_BULLET]: 0
+    [CLASS_BULLET]: 0,
+    [CLASS_EAGLE]: 500,
 };
 
 const levels = [{
@@ -44,15 +45,17 @@ const levels = [{
     title: "2-Д",
     img: "img/level_2d.png",
     lives: 3,
-    field: `----#@#----
+    field: `
+            ----#@#----
             --&-*-*----
             #*------&*-
             &----*---*-
-            -*-***----
+            -*-***-----
             -*---*---*-
             -*-------*#
             ----#**---&
-            &-***$#---`,
+            &-***$#----
+            `,
     enemies: [
         {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 0},
         {dir: DIR.LEFT, mode: MODES.TURRET, period: 3, offset: 2},
@@ -65,7 +68,27 @@ const levels = [{
     id: 2,
     title: "3-Д",
     img: "img/level_3d.png",
-    lives: 5
+    field: `-----&-----
+            ----&-&----
+            #*&-----&*-
+            &----*---*-
+            -*-**-----$
+            &----*---*-
+            **-------*#
+            ----#**---&
+            &--*#@#---`,
+    enemies: [
+        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 0},
+        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 1},
+        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 2},
+        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 3},
+        {dir: DIR.DOWN, mode: MODES.TURRET, period: 4, offset: 2},
+        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 1},
+        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 3, offset: 2},
+        {dir: DIR.LEFT, mode: MODES.TURRET, period: 7, offset: 5},
+        {dir: DIR.RIGHT, mode: MODES.TURRET, period: 7, offset: 5},
+    ],
+    player: {dir: DIR.UP}
 }];
 
 let arena = {
@@ -80,27 +103,25 @@ let arena = {
 app.controller('levelCtrl', function ($scope) {
     window.$scope = $scope;
 
-    $scope.level = getLevel(parseMetadata().id);
+    loadMeta();
 
-    $scope.start = function (level) {
-        $scope.meta = JSON.parse(JSON.stringify(level));
+    $scope.start = function (levelInfo) {
+        showMessage("Достигните базы, не допустите её уничтожения!");
+        window.level = JSON.parse(JSON.stringify(levelInfo));
         $scope.meta.title = level.title;
-        $scope.meta.score = localStorage["score"] | 0;
-        window.field = parseField($scope.meta.field);
+        window.field = parseField(level.field);
         for (let i in field.enemies) {
             let unit = field.enemies[i];
-            unit.dir = $scope.meta.enemies[i].dir;
-            unit.mode = $scope.meta.enemies[i].mode;
-            unit.offset = $scope.meta.enemies[i].offset;
-            unit.period = $scope.meta.enemies[i].period;
+            unit.dir = level.enemies[i].dir;
+            unit.mode = level.enemies[i].mode;
+            unit.offset = level.enemies[i].offset;
+            unit.period = level.enemies[i].period;
             moveUnit(unit)
         }
-        field.player.dir = $scope.level.player.dir;
+        field.player.dir = level.player.dir;
         moveUnit(field.player)
     };
-
-    loadGame();
-    $scope.start($scope.level);
+    $scope.start(getLevelInfo($scope.meta.levelId));
 
     $scope.lives = function (max, actual) {
         lives = [];
@@ -108,6 +129,13 @@ app.controller('levelCtrl', function ($scope) {
             lives.push(i < actual);
         }
         return lives;
+    };
+
+    $scope.reset = function() {
+        resetProgress();
+        resetMeta();
+        localStorage.clear();
+        location.reload()
     };
 
     document.body.onkeydown = onkeypress;
@@ -177,7 +205,7 @@ function onkeypress(event) {
         triggerStep = true;
     }
     moveUnit(field.player);  // move or rotate elem according to new position
-    if (triggerStep) step();
+    if (triggerStep) $scope.$apply(step);
 }
 
 function fire(unit) {
@@ -205,15 +233,12 @@ function getUnit(x, y) {
     if (x < 0 || y < 0 || x >= field.w || y >= field.h) return true;
 }
 
-function getLevel(id) {
+function getLevelInfo(id) {
     return levels[id - 1];
 }
 
-function parseMetadata() {
-    let id = location.href.match(/id=([^#&]+)/)[1];
-    return {
-        id: id,
-    }
+function getLevelId() {
+    return location.href.match(/id=([^#&]+)/)[1];
 }
 
 function showUnit(unit) {
@@ -310,9 +335,10 @@ function prepareArena(w, h) { // width and height of field, in cells
 }
 
 function step() {
-    arena.ready = false
+    arena.ready = false;
     if (field.player.x === field.eagle.x && field.player.y === field.eagle.y) {
         $scope.meta.score += SCORES[CLASS_EAGLE];
+        victory();
         return;
     }
     for (let enemy of field.enemies) {
@@ -325,25 +351,18 @@ function step() {
             enemy.offset--;
         }
     }
-    for (let bullet of field.bullets) {
-        if (!bullet.alive) continue;
-        stepBullet(bullet)
-    }
+    for (let bullet of field.bullets) stepBullet(bullet)
+    for (let bullet of field.bullets) stepBullet(bullet)
     setTimeout(() => arena.ready = true, STEP_TIMEOUT);
     saveProgress();
 }
 
 function stepBullet(bullet) {
+    if (!bullet.alive) return;
     let coordDelta = getCoordDeltasByDir(bullet.dir);
     let collision = getUnit(bullet.x + coordDelta.x, bullet.y + coordDelta.y); // if
     bullet.x += coordDelta.x;
     bullet.y += coordDelta.y;
-    if (collision == null) {
-        moveUnit(bullet);
-        collision = getUnit(bullet.x + coordDelta.x, bullet.y + coordDelta.y);
-        bullet.x += coordDelta.x;
-        bullet.y += coordDelta.y;
-    }
     if (collision != null) {
         kill(collision, bullet);
     }
@@ -362,57 +381,87 @@ function kill(unit, bullet) {
             if (bullet.from === CLASS_PLAYER) {
                 $scope.meta.score += SCORES[unit.class];
             }
-            $scope.$apply();
+            // $scope.$apply();
             setTimeout(() => unit.elem.classList.add(CLASS_DEAD), STEP_TIMEOUT);
             break;
         case CLASS_PLAYER:
             $scope.meta.lives--;
-            showRed();
             if ($scope.meta.lives <= 0) {
                 field.player.alive = false;
-                gameOver(false);
+                failure('game')
+            } else {
+                failure('tank');
             }
-            $scope.$apply();
             break;
         case CLASS_EAGLE:
-            gameOver(false);
+            field.player.alive = false;
+            failure('base');
     }
 }
 
-function loadGame() {
+
+function saveProgress() {
+    saveMeta();
+    localStorage.level = JSON.stringify(level);
+}
+
+function resetProgress() {
+    localStorage.level = null;
+}
+
+function resetMeta() {
+    localStorage.meta = JSON.stringify($scope.meta);
+}
+
+
+function saveMeta() {
+    localStorage.meta = JSON.stringify($scope.meta);
+}
+
+function loadMeta() {
     if (localStorage.meta != null) {
         $scope.meta = JSON.parse(localStorage.meta);
+    } else {
+        $scope.meta = {score: 0, levelId: getLevelId(), lives: 3 }
     }
+}
 
+function failure(failureType) {
+    saveMeta();
+    switch (failureType) {
+        case 'game':
+            showMessage("Альфа-Танк уничтожен! Игра окончена!", true);
+            resetMeta();
+            break;
+        case 'tank':
+            showMessage("-1 жизнь!", true);
+            break;
+        case 'base':
+            showMessage("База уничтожена!", true);
+            break;
+    }
+}
+
+function victory() {
+    showMessage("Победа!");
+    saveMeta();
+    resetProgress();
+}
+
+function loadGame() {
     if (localStorage.field != null) {
         window.field = JSON.parse(localStorage.field);
-        $scope.field = field;
+        window.level = field;
         showMessage("Загружено сохранение!");
     }
     return field == null;
 }
 
-function gameOver(win) {
-    let message = win ? "Победа!" : "Поражение!";
-    localStorage.field = null;
-    showMessage(message);
-}
-
-function saveProgress() {
-    localStorage.field = JSON.stringify(field);
-    localStorage.meta = JSON.stringify($scope.meta);
-}
-
-function showMessage(message) {
+function showMessage(message, red = false, time = 1000) {
     label.children[0].innerText = message;
+    label.style.display = 'inherit';
     label.style.opacity = '100%';
-    label.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    setTimeout(() => label.style.opacity = '0%', 1000);
-}
-
-function showRed() {
-    label.children[0].innerText = '';
-    label.style.opacity = '100%';
-    label.style.backgroundColor = 'rgba(255,0,0,0.5)';
-    setTimeout(() => label.style.opacity = '0%', 1000);
+    label.style.backgroundColor = red ? 'rgba(255,0,0,0.5)' : 'rgba(0,0,0,0.5)';
+    setTimeout(() => label.style.opacity = '0%', time);
+    setTimeout(() => label.style.display = 'none', time  + 500);
 }
