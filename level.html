@@ -12,15 +12,19 @@
 <body ng-app="app" ng-controller="levelCtrl">
 <div id='wrapper'>
     <header>
-        <a id="back" href="."><b>Назад</b></a>
-        <div id="score" ng-model="meta.score"></div>
-        <div id="level" ng-model="level.title"></div>
-        <div id="lives" title="Осталось {{meta.lives}} из {{level.lives}} очков здоровья">
-            <img ng-repeat="life in lives(level.lives, meta.lives) track by $index" ng-src="img/interface/heart_mini_{{life ? 'full' : 'empty'}}.png"
-                 class="pixel" alt="">
+        <div id="stats">
+            <p id="score" ng-bind="'Очков: ' + meta.score"></p>
+            <div id="lives" title="Осталось {{meta.lives}} из {{level.lives}} очков здоровья">
+                <img ng-repeat="life in lives(level.lives, meta.lives) track by $index"
+                     ng-src="img/interface/heart_mini_{{life ? 'full' : 'empty'}}.png"
+                     class="pixel" alt="">
+            </div>
         </div>
+        <div><h3 id="level" ng-bind="meta.title"></h3></div>
+        <a id="back" href="."><b>Назад</b></a>
     </header>
     <article>
+        <div id="label"><h4>Время обеда!</h4></div>
         <div id="arena">
             <!-- there will be THE BATTLE-->
         </div>
